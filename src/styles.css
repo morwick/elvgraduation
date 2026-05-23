@@ -336,7 +336,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none}
 }
 
 /* ===== SERVICES ===== */
-.services{padding:120px 0 96px}
+.services{padding-block:120px 96px}
 .services-head{
   display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end;
   margin-bottom:64px;
@@ -534,7 +534,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none}
 }
 
 /* ===== PROCESS ===== */
-.process{padding:120px 0}
+.process{padding-block:120px}
 .proc-grid{
   display:grid;grid-template-columns:repeat(4,1fr);gap:0;
   margin-top:64px;
@@ -865,11 +865,11 @@ button{font-family:inherit;cursor:pointer;border:0;background:none}
   .lede{font-size:16px}
 
   /* Sections — tighter vertical rhythm */
-  .services{padding:72px 0 64px}
-  .portfolio{padding:80px 0}
-  .process{padding:80px 0}
-  .testi{padding:80px 0}
-  .book{padding:72px 0}
+  .services{padding-block:72px 64px}
+  .portfolio{padding-block:80px}
+  .process{padding-block:80px}
+  .testi{padding-block:80px}
+  .book{padding-block:72px}
 
   /* Hero — auto-size to content, no empty bottom space on tall phones */
   .hero{
