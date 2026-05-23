@@ -13,7 +13,7 @@ export default function Hero() {
       <div className="hero-inner" data-parallax="-0.08">
         <h1 className="hero-title">
           Toga, tirai,<br />
-          dan <em>cahaya</em><br />
+          dan <em>cahaya</em>{" "}<br />
           terakhir<span className="ampersand">.</span>
         </h1>
         <div className="hero-side">
