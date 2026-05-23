@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useContent } from "../context/ContentContext.jsx";
 import { submitBooking } from "../lib/api.js";
+import RichText from "./RichText.jsx";
+
+const FB_EYEBROW = "Booking Sesi";
+const FB_TITLE   = "Pesan tanggal\nAnda *sekarang.*";
+const FB_LEDE    = "Jadwal Mei–Agustus biasanya penuh tiga bulan sebelum hari H. Isi formulir di samping atau hubungi kami langsung — tim akan balas dalam 6 jam kerja.";
 
 export default function Booking() {
   const { packages, site } = useContent();
@@ -41,16 +46,11 @@ export default function Booking() {
     <section className="book" id="booking" data-screen-label="07 Booking">
       <div className="container book-grid">
         <div className="book-side reveal">
-          <span className="eyebrow">Booking Sesi</span>
+          <span className="eyebrow">{site.bookingEyebrow || FB_EYEBROW}</span>
           <h2>
-            Pesan tanggal<br />
-            Anda <em>sekarang.</em>
+            <RichText text={site.bookingTitle} fallback={FB_TITLE} />
           </h2>
-          <p className="lede">
-            Jadwal Mei–Agustus biasanya penuh tiga bulan sebelum hari H.
-            Isi formulir di samping atau hubungi kami langsung — tim akan
-            balas dalam 6 jam kerja.
-          </p>
+          <p className="lede">{site.bookingLede || FB_LEDE}</p>
           <div className="book-info">
             <div className="row">
               <div className="k">Studio</div>

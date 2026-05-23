@@ -1,4 +1,7 @@
 import { useContent } from "../context/ContentContext.jsx";
+import RichText from "./RichText.jsx";
+
+const HERO_TITLE_FALLBACK = "Toga, tirai,\ndan *cahaya*\nterakhir.";
 
 export default function Hero() {
   const { site, heroBg } = useContent();
@@ -12,9 +15,7 @@ export default function Hero() {
 
       <div className="hero-inner" data-parallax="-0.08">
         <h1 className="hero-title">
-          Toga, tirai,<br />
-          dan <em>cahaya</em>{" "}<br />
-          terakhir<span className="ampersand">.</span>
+          <RichText text={site.heroTitle} fallback={HERO_TITLE_FALLBACK} />
         </h1>
         <div className="hero-side">
           <span className="eyebrow on-dark">{site.est}</span>

@@ -38,6 +38,23 @@ function mapSite(row) {
     instagramUrl:     row.instagram_url ?? "#",
     tiktokUrl:        row.tiktok_url ?? "#",
     youtubeUrl:       row.youtube_url ?? "#",
+
+    // Section copy — editable via admin (RichText: \n + *italic*)
+    heroTitle:        row.hero_title        ?? "",
+    servicesEyebrow:  row.services_eyebrow  ?? "",
+    servicesTitle:    row.services_title    ?? "",
+    servicesLede:     row.services_lede     ?? "",
+    portfolioEyebrow: row.portfolio_eyebrow ?? "",
+    portfolioTitle:   row.portfolio_title   ?? "",
+    aboutEyebrow:     row.about_eyebrow     ?? "",
+    aboutTitle:       row.about_title       ?? "",
+    processEyebrow:   row.process_eyebrow   ?? "",
+    processTitle:     row.process_title     ?? "",
+    testiEyebrow:     row.testi_eyebrow     ?? "",
+    testiTitle:       row.testi_title       ?? "",
+    bookingEyebrow:   row.booking_eyebrow   ?? "",
+    bookingTitle:     row.booking_title     ?? "",
+    bookingLede:      row.booking_lede      ?? "",
   };
 }
 

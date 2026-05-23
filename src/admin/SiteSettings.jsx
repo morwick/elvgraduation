@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
 import { uploadImage } from "../lib/api.js";
 
-const FIELDS = [
+const BRAND_FIELDS = [
   ["brand",            "Brand", "text"],
   ["est",              "Eyebrow (Est.)", "text"],
   ["whatsapp_phone",   "WhatsApp Phone (cth 6281288880188)", "text"],
@@ -11,14 +11,72 @@ const FIELDS = [
   ["address_line1",    "Alamat (baris 1)", "text"],
   ["address_line2",    "Alamat (baris 2)", "text"],
   ["hours",            "Jam Studio", "text"],
-  ["hero_description", "Hero — deskripsi", "textarea"],
-  ["about_body",       "About — body", "textarea"],
-  ["footer_tagline",   "Footer tagline", "textarea"],
-  ["copyright",        "Copyright", "text"],
   ["instagram_url",    "URL Instagram", "text"],
   ["tiktok_url",       "URL TikTok", "text"],
   ["youtube_url",      "URL YouTube", "text"],
+  ["footer_tagline",   "Footer tagline", "textarea"],
+  ["copyright",        "Copyright", "text"],
 ];
+
+// Section copy cards — every group below renders inside its own card.
+// type "rich" = textarea + small helper note for the \n / *kata* syntax.
+const SECTION_CARDS = [
+  {
+    title: "Hero",
+    fields: [
+      ["hero_title",       "Hero — Title",        "rich"],
+      ["hero_description", "Hero — Description",  "textarea"],
+    ],
+  },
+  {
+    title: "Services (Paket Layanan)",
+    fields: [
+      ["services_eyebrow", "Eyebrow",     "text"],
+      ["services_title",   "Title",       "rich"],
+      ["services_lede",    "Description", "textarea"],
+    ],
+  },
+  {
+    title: "Portfolio (Galeri)",
+    fields: [
+      ["portfolio_eyebrow", "Eyebrow", "text"],
+      ["portfolio_title",   "Title",   "rich"],
+    ],
+  },
+  {
+    title: "About (Tentang)",
+    fields: [
+      ["about_eyebrow", "Eyebrow",    "text"],
+      ["about_title",   "Title",      "rich"],
+      ["about_body",    "Body",       "textarea"],
+    ],
+  },
+  {
+    title: "Process (Proses Kerja)",
+    fields: [
+      ["process_eyebrow", "Eyebrow", "text"],
+      ["process_title",   "Title",   "rich"],
+    ],
+  },
+  {
+    title: "Testimonials (Cerita Klien)",
+    fields: [
+      ["testi_eyebrow", "Eyebrow", "text"],
+      ["testi_title",   "Title",   "rich"],
+    ],
+  },
+  {
+    title: "Booking",
+    fields: [
+      ["booking_eyebrow", "Eyebrow",     "text"],
+      ["booking_title",   "Title",       "rich"],
+      ["booking_lede",    "Description", "textarea"],
+    ],
+  },
+];
+
+const RICH_HINT =
+  "Tips: pakai baris baru (Enter) untuk ganti baris, dan *kata* untuk italic warna emas. Contoh: Toga, tirai,⏎dan *cahaya*⏎terakhir.";
 
 export default function SiteSettings() {
   const [row, setRow] = useState(null);
@@ -62,7 +120,7 @@ export default function SiteSettings() {
   return (
     <>
       <h1 className="adm-h">Site <em>Settings</em></h1>
-      <p className="adm-sub">Pengaturan global situs — brand, kontak, copy text, gambar hero & about.</p>
+      <p className="adm-sub">Pengaturan global situs — brand, kontak, copy text per section, gambar hero & about.</p>
 
       {error && <div className="adm-error">{error}</div>}
       {ok && <div className="adm-success">{ok}</div>}
@@ -79,16 +137,19 @@ export default function SiteSettings() {
 
       <div className="adm-card">
         <h3>Detail brand & kontak</h3>
-        {FIELDS.map(([k, label, type]) => (
-          <div key={k} className="adm-row">
-            <label>{label}</label>
-            {type === "textarea"
-              ? <textarea value={row[k] ?? ""} onChange={upd(k)} />
-              : <input type={type} value={row[k] ?? ""} onChange={upd(k)} />
-            }
-          </div>
+        {BRAND_FIELDS.map(([k, label, type]) => (
+          <Field key={k} k={k} label={label} type={type} value={row[k]} onChange={upd(k)} />
         ))}
       </div>
+
+      {SECTION_CARDS.map((card) => (
+        <div key={card.title} className="adm-card">
+          <h3>{card.title}</h3>
+          {card.fields.map(([k, label, type]) => (
+            <Field key={k} k={k} label={label} type={type} value={row[k]} onChange={upd(k)} />
+          ))}
+        </div>
+      ))}
 
       <div className="adm-btn-row">
         <button className="adm-btn primary" onClick={save} disabled={busy}>
@@ -96,6 +157,32 @@ export default function SiteSettings() {
         </button>
       </div>
     </>
+  );
+}
+
+function Field({ k, label, type, value, onChange }) {
+  const isRich  = type === "rich";
+  const isArea  = isRich || type === "textarea";
+  return (
+    <div className="adm-row">
+      <label>{label}</label>
+      {isArea
+        ? <textarea
+            rows={isRich ? 4 : 3}
+            value={value ?? ""}
+            onChange={onChange}
+          />
+        : <input type={type} value={value ?? ""} onChange={onChange} />
+      }
+      {isRich && (
+        <small style={{
+          fontSize:11, color:"rgba(26,20,20,.55)",
+          letterSpacing:".03em", marginTop:4, display:"block"
+        }}>
+          {RICH_HINT}
+        </small>
+      )}
+    </div>
   );
 }
 

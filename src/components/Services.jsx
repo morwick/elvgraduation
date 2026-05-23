@@ -1,7 +1,12 @@
 import { useContent } from "../context/ContentContext.jsx";
+import RichText from "./RichText.jsx";
+
+const FB_EYEBROW = "Paket Layanan";
+const FB_TITLE   = "Tiga cara\nuntuk *diingat.*";
+const FB_LEDE    = "Setiap paket dimulai dengan konsultasi konsep selama 30 menit. Tidak ada biaya tersembunyi — harga di bawah sudah termasuk tim, alat, edit, dan pengiriman digital.";
 
 export default function Services() {
-  const { packages } = useContent();
+  const { packages, site } = useContent();
   return (
     <section
       className="services container"
@@ -10,17 +15,12 @@ export default function Services() {
     >
       <div className="services-head reveal">
         <div>
-          <span className="eyebrow">Paket Layanan</span>
+          <span className="eyebrow">{site.servicesEyebrow || FB_EYEBROW}</span>
           <h2 className="section-title">
-            Tiga cara<br />
-            untuk <em>diingat.</em>
+            <RichText text={site.servicesTitle} fallback={FB_TITLE} />
           </h2>
         </div>
-        <p className="lede">
-          Setiap paket dimulai dengan konsultasi konsep selama 30 menit. Tidak
-          ada biaya tersembunyi — harga di bawah sudah termasuk tim, alat, edit,
-          dan pengiriman digital.
-        </p>
+        <p className="lede">{site.servicesLede || FB_LEDE}</p>
       </div>
 
       <div className="packages reveal">

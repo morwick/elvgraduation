@@ -1,4 +1,8 @@
 import { useContent } from "../context/ContentContext.jsx";
+import RichText from "./RichText.jsx";
+
+const FB_EYEBROW = "Tentang Kami";
+const FB_TITLE   = "Sebuah studio\nkecil yang *obsesif*\nterhadap detail.";
 
 export default function About() {
   const { aboutImg, stats, site } = useContent();
@@ -10,11 +14,9 @@ export default function About() {
         style={{ backgroundImage: `url(${aboutImg})` }}
       ></div>
       <div className="about-body reveal">
-        <span className="eyebrow on-dark">Tentang Kami</span>
+        <span className="eyebrow on-dark">{site.aboutEyebrow || FB_EYEBROW}</span>
         <h2>
-          Sebuah studio<br />
-          kecil yang <em>obsesif</em><br />
-          terhadap detail.
+          <RichText text={site.aboutTitle} fallback={FB_TITLE} />
         </h2>
         <p>{site.aboutBody || (
           <>

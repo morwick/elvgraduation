@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react";
 import { useContent } from "../context/ContentContext.jsx";
+import RichText from "./RichText.jsx";
+
+const FB_EYEBROW = "Galeri Karya";
+const FB_TITLE   = "Sembilan momen,\n*satu malam* tak terulang.";
 
 export default function Portfolio({ onOpen }) {
-  const { portfolio, portfolioCategories } = useContent();
+  const { portfolio, portfolioCategories, site } = useContent();
   const [filter, setFilter] = useState("semua");
 
   const items = useMemo(
@@ -15,10 +19,9 @@ export default function Portfolio({ onOpen }) {
       <div className="container">
         <div className="port-head reveal">
           <div>
-            <span className="eyebrow">Galeri Karya</span>
+            <span className="eyebrow">{site.portfolioEyebrow || FB_EYEBROW}</span>
             <h2 className="section-title">
-              Sembilan momen,<br />
-              <em>satu malam</em> tak terulang.
+              <RichText text={site.portfolioTitle} fallback={FB_TITLE} />
             </h2>
           </div>
           <div className="port-filters">

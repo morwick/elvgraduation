@@ -1,15 +1,18 @@
 import { useContent } from "../context/ContentContext.jsx";
+import RichText from "./RichText.jsx";
+
+const FB_EYEBROW = "Cerita Klien";
+const FB_TITLE   = "Mereka yang sudah *pulang*\ndengan bingkai di tangan.";
 
 export default function Testimonials() {
-  const { testimonials } = useContent();
+  const { testimonials, site } = useContent();
   return (
     <section className="testi" id="testi" data-screen-label="06 Cerita">
       <div className="container">
         <div className="reveal" style={{ maxWidth: 680 }}>
-          <span className="eyebrow">Cerita Klien</span>
+          <span className="eyebrow">{site.testiEyebrow || FB_EYEBROW}</span>
           <h2 className="section-title">
-            Mereka yang sudah <em>pulang</em><br />
-            dengan bingkai di tangan.
+            <RichText text={site.testiTitle} fallback={FB_TITLE} />
           </h2>
         </div>
         <div className="testi-track reveal">
