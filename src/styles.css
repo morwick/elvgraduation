@@ -1150,3 +1150,30 @@ button{font-family:inherit;cursor:pointer;border:0;background:none}
   }
   .mobile-menu-links a{font-size:22px}
 }
+
+/* Splash shown while the public site is loading its CMS content for the
+   first time — prevents the bundled fallback content from flashing. */
+.content-splash{
+  position:fixed; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:18px;
+  background:var(--paper);
+  color:var(--maroon);
+  z-index:9999;
+}
+.content-splash__spinner{
+  width:42px; height:42px;
+  border-radius:50%;
+  border:2px solid rgba(42,0,1,.15);
+  border-top-color:var(--maroon);
+  animation: contentSplashSpin .9s linear infinite;
+}
+.content-splash__label{
+  font-family:var(--font-sans);
+  font-size:11px; font-weight:600;
+  letter-spacing:.32em; text-transform:uppercase;
+}
+@keyframes contentSplashSpin{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){
+  .content-splash__spinner{ animation-duration: 2s; }
+}

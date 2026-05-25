@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
 import { uploadImage } from "../lib/api.js";
+import { bustContentCache } from "../lib/contentCache.js";
 
 const SPANS = ["s-3x4","s-3x5","s-3x6","s-4x5","s-4x6","s-5x5","s-6x4","s-2x4","s-2x3","s-6x5","s-3x3"];
 const BLANK = { cat: "outdoor", title: "", sub: "", span: "s-4x5", img: "", position: 0 };
@@ -29,6 +30,7 @@ export default function Portfolio() {
       if (!payload.id) delete payload.id;
       const { error } = await supabase.from("portfolio").upsert(payload);
       if (error) throw error;
+      bustContentCache();
       setEditing(null);
       refresh();
     } catch (e) { setError(e.message); }
@@ -38,7 +40,7 @@ export default function Portfolio() {
     if (!confirm("Hapus foto ini dari galeri?")) return;
     const { error } = await supabase.from("portfolio").delete().eq("id", id);
     if (error) setError(error.message);
-    else refresh();
+    else { bustContentCache(); refresh(); }
   };
 
   const handleUpload = async (file) => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
+import { bustContentCache } from "../lib/contentCache.js";
 
 const BLANK = { label: "", href: "", position: 0 };
 
@@ -20,13 +21,13 @@ export default function NavLinks() {
     if (!payload.id) delete payload.id;
     const { error } = await supabase.from("nav_links").upsert(payload);
     if (error) setError(error.message);
-    else { setEditing(null); refresh(); }
+    else { bustContentCache(); setEditing(null); refresh(); }
   };
   const remove = async (id) => {
     if (!confirm("Hapus link ini?")) return;
     const { error } = await supabase.from("nav_links").delete().eq("id", id);
     if (error) setError(error.message);
-    else refresh();
+    else { bustContentCache(); refresh(); }
   };
 
   return (

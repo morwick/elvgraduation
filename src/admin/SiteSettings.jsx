@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
 import { uploadImage } from "../lib/api.js";
+import { bustContentCache } from "../lib/contentCache.js";
 
 const BRAND_FIELDS = [
   ["brand",            "Brand", "text"],
@@ -102,6 +103,7 @@ export default function SiteSettings() {
     try {
       const { error } = await supabase.from("site_settings").upsert({ ...row, id: 1 });
       if (error) throw error;
+      bustContentCache();
       setOk("Tersimpan.");
       setTimeout(() => setOk(""), 3000);
     } catch (e) { setError(e.message); }

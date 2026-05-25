@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
+import { bustContentCache } from "../lib/contentCache.js";
 
 const BLANK = {
   id: "", name: "", italic: "", tagline: "", currency: "IDR",
@@ -24,6 +25,7 @@ export default function Packages() {
       const payload = { ...editing, features: editing.features.filter(f => f.trim()) };
       const { error } = await supabase.from("packages").upsert(payload);
       if (error) throw error;
+      bustContentCache();
       setEditing(null);
       refresh();
     } catch (e) { setError(e.message); }
@@ -33,7 +35,7 @@ export default function Packages() {
     if (!confirm("Hapus paket ini?")) return;
     const { error } = await supabase.from("packages").delete().eq("id", id);
     if (error) setError(error.message);
-    else refresh();
+    else { bustContentCache(); refresh(); }
   };
 
   return (

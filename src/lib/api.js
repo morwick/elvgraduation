@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from "./supabase.js";
+import { bustContentCache } from "./contentCache.js";
 
 // ---------- READ ----------
 async function readOrdered(table) {
@@ -87,6 +88,9 @@ export async function deleteBooking(id) {
 }
 
 // ---------- Generic CRUD helpers used by admin pages ----------
+// Every mutation that changes published content also drops the public
+// cache so the next public refresh re-fetches instead of showing stale
+// data through the cache-first hydration in ContentContext.
 export async function upsertRow(table, row, opts = {}) {
   const { data, error } = await supabase
     .from(table)
@@ -94,6 +98,7 @@ export async function upsertRow(table, row, opts = {}) {
     .select()
     .single();
   if (error) throw error;
+  bustContentCache();
   return data;
 }
 
@@ -104,6 +109,7 @@ export async function insertRow(table, row) {
     .select()
     .single();
   if (error) throw error;
+  bustContentCache();
   return data;
 }
 
@@ -115,12 +121,14 @@ export async function updateRow(table, id, patch, idField = "id") {
     .select()
     .single();
   if (error) throw error;
+  bustContentCache();
   return data;
 }
 
 export async function deleteRow(table, id, idField = "id") {
   const { error } = await supabase.from(table).delete().eq(idField, id);
   if (error) throw error;
+  bustContentCache();
 }
 
 // ---------- Image upload to Storage bucket 'images' ----------

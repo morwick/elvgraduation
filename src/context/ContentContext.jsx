@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { loadAll } from "../lib/api.js";
 import { isSupabaseConfigured } from "../lib/supabase.js";
+import { readContentCache, writeContentCache } from "../lib/contentCache.js";
 import {
   SITE as FALLBACK_SITE,
   HERO_BG as FALLBACK_HERO_BG,
@@ -72,9 +73,39 @@ const DEFAULT_CONTENT = {
   nav: FALLBACK_NAV,
 };
 
+function buildContent(d) {
+  return {
+    site: mapSite(d.site),
+    heroBg:   d.site?.hero_bg   || FALLBACK_HERO_BG,
+    aboutImg: d.site?.about_img || FALLBACK_ABOUT_IMG,
+    packages:            d.packages?.length            ? d.packages.map(mapPackage)               : FALLBACK_PACKAGES,
+    portfolio:           d.portfolio?.length           ? d.portfolio                              : FALLBACK_PORTFOLIO,
+    portfolioCategories: d.portfolioCategories?.length ? d.portfolioCategories.map((c) => [c.key, c.label]) : FALLBACK_PORTFOLIO_CATEGORIES,
+    process:             d.process?.length             ? d.process                                : FALLBACK_PROCESS,
+    testimonials:        d.testimonials?.length        ? d.testimonials                           : FALLBACK_TESTIMONIALS,
+    stats:               d.stats?.length               ? d.stats                                  : FALLBACK_STATS,
+    marquee:             d.marquee?.length             ? d.marquee.map((m) => m.text)             : FALLBACK_MARQUEE,
+    nav:                 d.nav?.length                 ? d.nav.map((n) => [n.label, n.href])      : FALLBACK_NAV,
+  };
+}
+
+// Initial state strategy:
+//  - Supabase not configured → use bundled defaults, no loader.
+//  - Cache present          → hydrate instantly from cache, revalidate in background.
+//  - No cache               → start empty and show a splash until the first fetch resolves.
+function initialState() {
+  if (!isSupabaseConfigured) {
+    return { content: DEFAULT_CONTENT, loading: false };
+  }
+  const cached = readContentCache();
+  if (cached) {
+    return { content: cached, loading: false };
+  }
+  return { content: null, loading: true };
+}
+
 export function ContentProvider({ children }) {
-  const [content, setContent] = useState(DEFAULT_CONTENT);
-  const [loading, setLoading] = useState(isSupabaseConfigured);
+  const [{ content, loading }, setState] = useState(initialState);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,38 +114,42 @@ export function ContentProvider({ children }) {
     loadAll()
       .then((d) => {
         if (cancelled || !d) return;
-        setContent({
-          site: {
-            ...mapSite(d.site),
-            // pass through everything mapSite returned but also expose the raw row
-            // for places that want extra fields.
-          },
-          heroBg:   d.site?.hero_bg   || FALLBACK_HERO_BG,
-          aboutImg: d.site?.about_img || FALLBACK_ABOUT_IMG,
-          packages:            d.packages?.length            ? d.packages.map(mapPackage)               : FALLBACK_PACKAGES,
-          portfolio:           d.portfolio?.length           ? d.portfolio                              : FALLBACK_PORTFOLIO,
-          portfolioCategories: d.portfolioCategories?.length ? d.portfolioCategories.map((c) => [c.key, c.label]) : FALLBACK_PORTFOLIO_CATEGORIES,
-          process:             d.process?.length             ? d.process                                : FALLBACK_PROCESS,
-          testimonials:        d.testimonials?.length        ? d.testimonials                           : FALLBACK_TESTIMONIALS,
-          stats:               d.stats?.length               ? d.stats                                  : FALLBACK_STATS,
-          marquee:             d.marquee?.length             ? d.marquee.map((m) => m.text)             : FALLBACK_MARQUEE,
-          nav:                 d.nav?.length                 ? d.nav.map((n) => [n.label, n.href])      : FALLBACK_NAV,
-        });
+        const next = buildContent(d);
+        writeContentCache(next);
+        setState({ content: next, loading: false });
       })
       .catch((err) => {
         console.error("[ContentProvider] failed to load from Supabase:", err);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (cancelled) return;
+        // On failure with no prior content, fall back to bundled defaults so
+        // the page is still usable instead of stuck on the splash.
+        setState((prev) =>
+          prev.content
+            ? { content: prev.content, loading: false }
+            : { content: DEFAULT_CONTENT, loading: false }
+        );
       });
 
     return () => { cancelled = true; };
   }, []);
 
+  if (!content) {
+    return <ContentSplash />;
+  }
+
   return (
     <ContentContext.Provider value={{ ...content, loading }}>
       {children}
     </ContentContext.Provider>
+  );
+}
+
+function ContentSplash() {
+  return (
+    <div className="content-splash" role="status" aria-live="polite">
+      <div className="content-splash__spinner" aria-hidden="true" />
+      <span className="content-splash__label">Memuat…</span>
+    </div>
   );
 }
 

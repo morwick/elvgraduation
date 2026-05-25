@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
+import { bustContentCache } from "../lib/contentCache.js";
 
 const BLANK = { key: "", label: "", position: 0 };
 
@@ -19,14 +20,14 @@ export default function Categories() {
     setError("");
     const { error } = await supabase.from("portfolio_categories").upsert(editing);
     if (error) setError(error.message);
-    else { setEditing(null); refresh(); }
+    else { bustContentCache(); setEditing(null); refresh(); }
   };
   const remove = async (key) => {
     if (key === "semua") return alert("Kategori 'semua' diperlukan untuk filter dan tidak boleh dihapus.");
     if (!confirm("Hapus kategori ini? Foto-foto yang menggunakan kategori ini juga akan terdampak.")) return;
     const { error } = await supabase.from("portfolio_categories").delete().eq("key", key);
     if (error) setError(error.message);
-    else refresh();
+    else { bustContentCache(); refresh(); }
   };
 
   return (
