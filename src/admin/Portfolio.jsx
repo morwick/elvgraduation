@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { supabase } from "../lib/supabase.js";
-import { uploadImage, uploadVideo } from "../lib/api.js";
+import { uploadImage, uploadVideo, MAX_VIDEO_MB } from "../lib/api.js";
 import { bustContentCache } from "../lib/contentCache.js";
 
 const SPANS = ["s-3x4","s-3x5","s-3x6","s-4x5","s-4x6","s-5x5","s-6x4","s-2x4","s-2x3","s-6x5","s-3x3"];
@@ -29,6 +29,7 @@ export default function Portfolio() {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(null); // {pct, loaded, total}
   const [filter, setFilter] = useState("semua");
   const [viewMode, setViewMode] = useState("collage");
   const [saving, setSaving] = useState(false);
@@ -74,12 +75,14 @@ export default function Portfolio() {
   };
 
   const handleUploadVideo = async (file) => {
-    setUploadingVideo(true); setError("");
+    setUploadingVideo(true); setError(""); setVideoProgress({ pct: 0, loaded: 0, total: file.size });
     try {
-      const url = await uploadVideo(file, "portfolio-videos");
+      const url = await uploadVideo(file, "portfolio-videos", (pct, loaded, total) => {
+        setVideoProgress({ pct, loaded, total });
+      });
       setEditing({ ...editing, video: url });
     } catch (e) { setError(e.message); }
-    finally { setUploadingVideo(false); }
+    finally { setUploadingVideo(false); setVideoProgress(null); }
   };
 
   const visibleRows = useMemo(
@@ -177,7 +180,7 @@ export default function Portfolio() {
           </div>
 
           <div className="adm-row" style={{marginTop:18}}>
-            <label>URL Video (opsional — mp4)</label>
+            <label>URL Video (opsional — mp4, maks {MAX_VIDEO_MB} MB)</label>
             <input
               value={editing.video ?? ""}
               onChange={(e)=>setEditing({...editing,video:e.target.value})}
@@ -187,7 +190,7 @@ export default function Portfolio() {
               Kalau diisi, item ini muter otomatis (loop, tanpa suara) di galeri. Klik untuk buka lightbox dengan kontrol suara.
             </small>
           </div>
-          {editing.video && (
+          {editing.video && !uploadingVideo && (
             <video
               src={editing.video}
               controls
@@ -195,13 +198,17 @@ export default function Portfolio() {
               style={{marginTop:8,width:"100%",maxHeight:240,borderRadius:6,background:"#000"}}
             />
           )}
+          {uploadingVideo && videoProgress && (
+            <UploadProgress pct={videoProgress.pct} loaded={videoProgress.loaded} total={videoProgress.total} />
+          )}
           <div className="adm-btn-row" style={{marginTop:8}}>
-            <label className="adm-btn ghost" style={{cursor:"pointer"}}>
-              {uploadingVideo ? "Mengunggah video…" : "Unggah video (mp4)"}
+            <label className="adm-btn ghost" style={{cursor: uploadingVideo ? "not-allowed" : "pointer", opacity: uploadingVideo ? 0.6 : 1}}>
+              {uploadingVideo ? "Mengunggah video…" : `Unggah video (mp4, maks ${MAX_VIDEO_MB} MB)`}
               <input type="file" accept="video/mp4,video/webm,video/quicktime" style={{display:"none"}}
+                disabled={uploadingVideo}
                 onChange={(e)=>e.target.files?.[0] && handleUploadVideo(e.target.files[0])} />
             </label>
-            {editing.video && (
+            {editing.video && !uploadingVideo && (
               <button
                 type="button"
                 className="adm-btn danger"
@@ -291,6 +298,20 @@ export default function Portfolio() {
         </>
       )}
     </>
+  );
+}
+
+function UploadProgress({ pct, loaded, total }) {
+  const percent = Math.max(0, Math.min(100, Math.round(pct * 100)));
+  const mb = (n) => (n / 1024 / 1024).toFixed(1);
+  return (
+    <div className="adm-progress" style={{marginTop:10}}>
+      <div className="adm-progress-bar"><div className="adm-progress-fill" style={{width: percent + "%"}} /></div>
+      <div className="adm-progress-meta">
+        <span>{percent}%</span>
+        <span>{mb(loaded)} MB / {mb(total)} MB</span>
+      </div>
+    </div>
   );
 }
 

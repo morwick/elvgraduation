@@ -1,5 +1,12 @@
 import { supabase, isSupabaseConfigured } from "./supabase.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 import { bustContentCache } from "./contentCache.js";
+
+// Match the Supabase Free-plan default global file_size_limit. If you bump the
+// bucket limit in Supabase Dashboard → Storage → images → Configuration, also
+// update this constant — it's only the client-side guard, not the source of truth.
+export const MAX_VIDEO_MB = 50;
+export const MAX_IMAGE_MB = 10;
 
 // ---------- READ ----------
 async function readOrdered(table) {
@@ -134,6 +141,9 @@ export async function deleteRow(table, id, idField = "id") {
 // ---------- Image upload to Storage bucket 'images' ----------
 export async function uploadImage(file, folder = "uploads") {
   if (!isSupabaseConfigured) throw new Error("Supabase belum dikonfigurasi.");
+  if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+    throw new Error(`Gambar terlalu besar. Maks ${MAX_IMAGE_MB} MB, file kamu ${(file.size / 1024 / 1024).toFixed(1)} MB.`);
+  }
   const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
   const path = `${folder}/${Date.now()}-${safeName}`;
   const { error: upErr } = await supabase.storage
@@ -145,18 +155,53 @@ export async function uploadImage(file, folder = "uploads") {
 }
 
 // ---------- Video upload (same 'images' bucket, separate folder) ----------
-export async function uploadVideo(file, folder = "portfolio-videos") {
+// XHR-based so we can stream upload progress to the UI. supabase-js v2 still
+// uses fetch under the hood with no progress callback, so this talks to the
+// Storage REST endpoint directly with the user's session JWT.
+export async function uploadVideo(file, folder = "portfolio-videos", onProgress) {
   if (!isSupabaseConfigured) throw new Error("Supabase belum dikonfigurasi.");
+  if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+    throw new Error(`Video terlalu besar. Maks ${MAX_VIDEO_MB} MB, file kamu ${(file.size / 1024 / 1024).toFixed(1)} MB.`);
+  }
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if (!token) throw new Error("Sesi admin habis. Silakan login ulang.");
+
   const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
   const path = `${folder}/${Date.now()}-${safeName}`;
-  const { error: upErr } = await supabase.storage
-    .from("images")
-    .upload(path, file, {
-      upsert: false,
-      cacheControl: "3600",
-      contentType: file.type || "video/mp4",
+  const endpoint = `${SUPABASE_URL}/storage/v1/object/images/${path}`;
+
+  await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint, true);
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("apikey", SUPABASE_ANON_KEY);
+    xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
+    xhr.setRequestHeader("Cache-Control", "3600");
+    xhr.setRequestHeader("x-upsert", "false");
+
+    if (typeof onProgress === "function") {
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) onProgress(e.loaded / e.total, e.loaded, e.total);
+      });
+    }
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve();
+      let msg = `Upload gagal (HTTP ${xhr.status}).`;
+      try {
+        const body = JSON.parse(xhr.responseText);
+        if (body?.message) msg = body.message;
+        else if (body?.error) msg = body.error;
+      } catch { /* keep default */ }
+      if (xhr.status === 413) msg = `Video melebihi batas server. Coba kompres jadi <${MAX_VIDEO_MB} MB.`;
+      reject(new Error(msg));
     });
-  if (upErr) throw upErr;
+    xhr.addEventListener("error", () => reject(new Error("Koneksi terputus saat mengunggah.")));
+    xhr.addEventListener("abort", () => reject(new Error("Unggahan dibatalkan.")));
+    xhr.send(file);
+  });
+
   const { data } = supabase.storage.from("images").getPublicUrl(path);
   return data.publicUrl;
 }
