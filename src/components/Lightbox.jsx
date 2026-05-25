@@ -16,11 +16,22 @@ export default function Lightbox({ item, onClose }) {
           <button className="lb-close" onClick={onClose} aria-label="Tutup">
             ✕
           </button>
-          <img
-            src={item.img.replace(/w=\d+/, "w=1800")}
-            alt={item.title}
-            onClick={(e) => e.stopPropagation()}
-          />
+          {item.video ? (
+            <video
+              src={item.video}
+              poster={item.img}
+              controls
+              autoPlay
+              playsInline
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <img
+              src={item.img.replace(/w=\d+/, "w=1800")}
+              alt={item.title}
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
           <div className="lb-meta">
             <em>{item.title}</em> — {item.sub}
           </div>

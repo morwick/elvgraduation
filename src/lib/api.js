@@ -143,3 +143,20 @@ export async function uploadImage(file, folder = "uploads") {
   const { data } = supabase.storage.from("images").getPublicUrl(path);
   return data.publicUrl;
 }
+
+// ---------- Video upload (same 'images' bucket, separate folder) ----------
+export async function uploadVideo(file, folder = "portfolio-videos") {
+  if (!isSupabaseConfigured) throw new Error("Supabase belum dikonfigurasi.");
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+  const path = `${folder}/${Date.now()}-${safeName}`;
+  const { error: upErr } = await supabase.storage
+    .from("images")
+    .upload(path, file, {
+      upsert: false,
+      cacheControl: "3600",
+      contentType: file.type || "video/mp4",
+    });
+  if (upErr) throw upErr;
+  const { data } = supabase.storage.from("images").getPublicUrl(path);
+  return data.publicUrl;
+}

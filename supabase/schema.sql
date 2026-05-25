@@ -1,9 +1,23 @@
 -- ===========================================================================
 -- ELV.GRADUATION — Supabase schema
 -- Run in: Supabase Dashboard → SQL Editor → New query → paste → Run
+--
+-- ⚠️  PERINGATAN — DESTRUKTIF  ⚠️
+-- File ini akan men-`DROP TABLE ... CASCADE` SEMUA tabel di bawah dan
+-- MENGHAPUS SELURUH DATA (site_settings, packages, portfolio, bookings, dll).
+--
+-- HANYA jalankan file ini saat:
+--   • Setup project Supabase dari nol, ATAU
+--   • Sengaja reset penuh di development (sudah punya backup / tidak peduli)
+--
+-- Untuk MENAMBAH kolom/tabel di database yang sudah berisi data,
+-- gunakan file migration terpisah seperti:
+--   • supabase/add_section_content.sql
+--   • supabase/add_portfolio_video.sql
+-- File-file itu hanya `ALTER TABLE … ADD COLUMN IF NOT EXISTS` dan AMAN.
 -- ===========================================================================
 
--- Drop everything (safe to re-run during development) -----------------------
+-- Drop everything (DESTRUKTIF — hanya untuk reset penuh / setup baru) -------
 drop table if exists public.bookings           cascade;
 drop table if exists public.nav_links          cascade;
 drop table if exists public.marquee_items      cascade;
@@ -76,7 +90,8 @@ create table public.portfolio (
   title       text not null,
   sub         text,
   span        text not null default 's-3x4',   -- grid span class
-  img         text not null,
+  img         text not null,                   -- thumbnail / poster (wajib)
+  video       text,                            -- optional URL mp4 — kalau diisi grid pakai <video> auto-play muted
   position    int not null default 0,
   created_at  timestamptz not null default now()
 );

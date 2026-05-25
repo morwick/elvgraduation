@@ -77,7 +77,23 @@ Tombol "Unggah gambar" di Site Settings / Galeri akan meng-upload ke bucket
 `images` di Supabase Storage dan mengisi field URL secara otomatis. Anda juga
 bisa tempel URL eksternal (mis. Unsplash) langsung di field URL.
 
-## Reset ulang (development)
+## Migrasi tambahan (database yang sudah berisi data)
 
-`schema.sql` aman dijalankan ulang — semua tabel akan di-`drop … cascade` lalu
-dibuat ulang. Setelah itu jalankan `seed.sql` lagi untuk repopulate.
+⚠️ **JANGAN** menjalankan `schema.sql` ulang di database produksi — file itu
+menghapus seluruh data dengan `drop … cascade`.
+
+Untuk menambah fitur ke schema yang sudah ada, jalankan file migration
+spesifik yang hanya berisi `ALTER TABLE … ADD COLUMN IF NOT EXISTS`:
+
+| File                             | Fungsi                                              |
+| -------------------------------- | --------------------------------------------------- |
+| `add_section_content.sql`        | Tambah kolom eyebrow/title/lede ke `site_settings`  |
+| `add_portfolio_video.sql`        | Tambah kolom `video` ke `portfolio` (auto-play mp4) |
+
+File-file ini idempotent dan tidak menyentuh data.
+
+## Reset ulang (HANYA development)
+
+`schema.sql` akan men-`drop … cascade` SEMUA tabel berikut isinya, lalu
+membuatnya ulang. Hanya gunakan saat ingin reset penuh dari nol. Setelah itu
+jalankan `seed.sql` untuk repopulate data demo.

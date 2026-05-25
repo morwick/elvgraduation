@@ -44,7 +44,19 @@ export default function Portfolio({ onOpen }) {
               className={"port-item " + p.span}
               onClick={() => onOpen(p)}
             >
-              <img src={p.img} alt={p.title} loading="lazy" />
+              {p.video ? (
+                <video
+                  src={p.video}
+                  poster={p.img}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <img src={p.img} alt={p.title} loading="lazy" />
+              )}
               <div className="cap">
                 <div>
                   <div className="cap-s">{p.sub}</div>
