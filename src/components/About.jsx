@@ -12,6 +12,8 @@ export default function About() {
         className="about-img"
         data-parallax="0.25"
         style={{ backgroundImage: `url(${aboutImg})` }}
+        role="img"
+        aria-label="Tim ELV.GRADUATION saat sesi foto wisuda di Pekanbaru"
       ></div>
       <div className="about-body reveal">
         <span className="eyebrow on-dark">{site.aboutEyebrow || FB_EYEBROW}</span>

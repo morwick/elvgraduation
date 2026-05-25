@@ -28,7 +28,7 @@ export default function Lightbox({ item, onClose }) {
           ) : (
             <img
               src={item.img.replace(/w=\d+/, "w=1800")}
-              alt={item.title}
+              alt={`Foto wisuda ${item.title}${item.sub ? " — " + item.sub : ""}${item.cat ? " (" + item.cat + ")" : ""}`}
               onClick={(e) => e.stopPropagation()}
             />
           )}

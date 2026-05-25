@@ -1,8 +1,25 @@
-import { Navigate, NavLink, Outlet } from "react-router-dom";
+import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useSession, signOut } from "../lib/auth.js";
+import { useDocumentTitle } from "../hooks/useDocumentTitle.js";
+
+const ADMIN_TITLES = {
+  "/admin":              "Admin · Dashboard",
+  "/admin/bookings":     "Admin · Bookings",
+  "/admin/site":         "Admin · Site Settings",
+  "/admin/packages":     "Admin · Paket",
+  "/admin/portfolio":    "Admin · Galeri",
+  "/admin/categories":   "Admin · Kategori Galeri",
+  "/admin/process":      "Admin · Proses",
+  "/admin/testimonials": "Admin · Testimoni",
+  "/admin/stats":        "Admin · Statistik",
+  "/admin/marquee":      "Admin · Marquee",
+  "/admin/nav":          "Admin · Menu Navigasi",
+};
 
 export default function AdminLayout() {
   const { session, loading } = useSession();
+  const { pathname } = useLocation();
+  useDocumentTitle(ADMIN_TITLES[pathname] || "Admin");
 
   if (loading) {
     return (

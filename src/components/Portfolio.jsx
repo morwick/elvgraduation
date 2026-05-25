@@ -53,9 +53,14 @@ export default function Portfolio({ onOpen }) {
                   muted
                   playsInline
                   preload="metadata"
+                  aria-label={`Video wisuda — ${p.title}${p.sub ? " — " + p.sub : ""}`}
                 />
               ) : (
-                <img src={p.img} alt={p.title} loading="lazy" />
+                <img
+                  src={p.img}
+                  alt={`Foto wisuda ${p.title}${p.sub ? " — " + p.sub : ""}${p.cat ? " (" + p.cat + ")" : ""}`}
+                  loading="lazy"
+                />
               )}
               <div className="cap">
                 <div>

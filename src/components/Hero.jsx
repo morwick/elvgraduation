@@ -11,6 +11,8 @@ export default function Hero() {
         className="hero-bg"
         data-parallax="0.35"
         style={{ backgroundImage: `url(${heroBg})` }}
+        role="img"
+        aria-label="Foto wisuda cinematic — ELV.GRADUATION Pekanbaru"
       ></div>
 
       <div className="hero-inner" data-parallax="-0.08">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useReveal } from "./hooks/useReveal.js";
 import { useParallax } from "./hooks/useParallax.js";
+import { useDocumentTitle } from "./hooks/useDocumentTitle.js";
 
 import Nav from "./components/Nav.jsx";
 import Hero from "./components/Hero.jsx";
@@ -20,6 +21,7 @@ export default function PublicSite() {
 
   useReveal();
   useParallax();
+  useDocumentTitle(lbItem ? `${lbItem.title}${lbItem.sub ? " · " + lbItem.sub : ""}` : null);
 
   return (
     <>
