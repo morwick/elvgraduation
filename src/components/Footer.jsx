@@ -49,7 +49,16 @@ export default function Footer() {
         </div>
       </div>
       <div className="foot-bottom">
-        <span>{site.copyright || "© 2026 ELV.GRADUATION · PT Cahaya Akhir Studio"}</span>
+        <span>
+          © 2026{" "}
+          <a
+            href="https://www.instagram.com/stdrzk.id/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            RZK.id
+          </a>
+        </span>
         <span className="word">
           <em>terima kasih telah lulus.</em>
         </span>

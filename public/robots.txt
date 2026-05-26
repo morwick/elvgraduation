@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://elv-graduation.vercel.app/sitemap.xml
+Sitemap: https://elvgraduation.vercel.app/sitemap.xml

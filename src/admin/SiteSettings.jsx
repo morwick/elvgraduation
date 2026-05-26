@@ -16,7 +16,6 @@ const BRAND_FIELDS = [
   ["tiktok_url",       "URL TikTok", "text"],
   ["youtube_url",      "URL YouTube", "text"],
   ["footer_tagline",   "Footer tagline", "textarea"],
-  ["copyright",        "Copyright", "text"],
 ];
 
 // Section copy cards — every group below renders inside its own card.
