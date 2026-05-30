@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="foot-grid">
         <div>
           <div className="foot-brand">
-            ELV <em>graduation</em>
+            EyeLens<em>Visual</em>
           </div>
           <p className="foot-tag">
             {site.footerTagline || "Studio fotografi wisuda berbasis di Pekanbaru, Riau. Mengabadikan satu sore yang tak terulang — sejak 2018."}
